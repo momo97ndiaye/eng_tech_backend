@@ -1,0 +1,48 @@
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  image:  gradle:7.3.1-jdk17-alpine
+  script:
+    - echo "Building app..."
+    - gradle build
+    - echo "Finished building the app."
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - build/libs/micro-credit-backend.jar
+  only:
+    - merge_requests
+
+lint-test-job:   # This job also runs in the test stage.
+  stage: test    # It can run at the same time as unit-test-job (in parallel).
+  script:
+    - echo "Linting code... This will take about 10 seconds."
+    - sleep 10
+    - echo "No lint issues found."
+  only:
+    - merge_requests
+
+deploy:
+  stage: deploy
+  image: alpine:3.11
+  before_script:
+    - apk update && apk add openssh-client bash
+    - mkdir -p ~/.ssh
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - touch ~/.ssh/config
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - ssh-keyscan -H $DEPLOY_SERVER_IP >> ~/.ssh/known_hosts
+  script:
+    - echo "Deploying started..."
+    - ssh ubuntu@$DEPLOY_SERVER_IP "sudo systemctl stop micro-credit-backend.service"
+    - scp ./build/libs/micro-credit-backend.jar ubuntu@$DEPLOY_SERVER_IP:~/micro-credit-backend/
+    - ssh ubuntu@$DEPLOY_SERVER_IP "sudo systemctl start micro-credit-backend.service"
+    - echo "Finished deploying the app."
+  when: manual # deploy manually
+  only:
+    - main

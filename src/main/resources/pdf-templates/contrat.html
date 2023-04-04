@@ -1,0 +1,67 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style>
+        h1{
+            color: blue;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .quotation {
+            width: 100%;
+        }
+        .quotation, .quotation th, .quotation td {
+            border: 1px solid blue;
+            border-collapse: collapse;
+        }
+        .quotation th {
+            background-color: blue;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<h1 >Demande de crédit</h1>
+<table>
+    <tr>
+        <th>Information du client</th>
+    </tr>
+    <tr>
+        <td th:text="'Prenom: ' + ${order.customer.name}"></td>
+    </tr>
+    <tr>
+        <td th:text="'Nom: ' + ${order.customer.name}"></td>
+    </tr>
+    <tr>
+        <td th:text="'Address: ' + ${order.address}"></td>
+    </tr>
+    <tr>
+        <td th:text="'Email: ' + ${order.customer.email}"></td>
+    </tr>
+    <tr>
+        <td th:text="'Phone: ' + ${order.customer.phoneNumber}"></td>
+    </tr>
+</table>
+<br />
+<table class="quotation">
+    <tr>
+        <th>Code</th>
+        <th>Description</th>
+        <th>Montant</th>
+        <th>Institution</th>
+        <th th:if="${order.typeOrder.name() == 'EQUIPEMENT'}">Valeur bien</th>
+        <th>Durée</th>
+        <th>Date</th>
+    </tr>
+    <tr >
+        <td th:text="${order.code}"></td>
+        <td th:text="${order.description}"></td>
+        <td th:text="${order.getAmountFormat()}"></td>
+        <td th:text="${order.operator}"></td>
+        <td th:if="${order.typeOrder.name() == 'EQUIPEMENT'}" th:text="${order.getPropertyValueFormat()}"> </td>
+        <td th:text="${order.duration}"></td>
+        <td th:text="${order.getOrderDateFormat()}"></td>
+    </tr>
+</table>
+</body>
+</html>
